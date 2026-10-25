@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: product-service
+  profiles:
+    active: dev
+  cloud:
+    nacos:
+      server-addr: 192.168.249.190:8848
+      config:
+        namespace: 9ae22f2c-3821-422b-be21-53da39c218a2
+  config:
+    import:
+      - "nacos:shared_jdbc.yml"
+      - "nacos:shared_knife4j.yml"
+      - "nacos:shared_redis.yml"
+      - "nacos:shared_openfeign.yml"
+
+qchain:
+  db:
+    host: 127.0.0.1
+    database: qchain-product
+  mp:
+    package: com.zxyy.product.domain.entity
+  knife4j:
+    package-to-scan: com.zxyy.product.controller
+  redis:
+    host: 192.168.249.190

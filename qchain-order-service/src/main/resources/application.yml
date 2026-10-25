@@ -8,10 +8,6 @@ spring:
       # 兼容 IDEA 使用订单模块目录或 Qchain 根目录作为工作目录。
       - optional:file:../config/order-local.yml
       - optional:file:./config/order-local.yml
-  application:
-    name: order-service #微服务名称
-  profiles:
-    active: dev
   rabbitmq:
     host: ${RABBITMQ_HOST:192.168.249.190}
     port: ${RABBITMQ_PORT:5672}
@@ -46,65 +42,6 @@ spring:
   freemarker:
     suffix: .ftl
     charset: UTF-8
-  data:
-    redis:
-      host: 192.168.249.190
-      port: 6378
-      password:
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1:3306/qchain-order?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
-    username: root
-    password: 123456
-  cloud:
-    openfeign:
-      okhttp:
-        enabled: true
-      httpclient:
-        hc5:
-          enabled: false
-        connection-timeout: 3000
-        # 当前 OpenFeign 版本将此值用于 OkHttp 连接池的最大空闲连接数。
-        max-connections: 50
-        max-connections-per-route: 50
-        time-to-live: 300
-        time-to-live-unit: SECONDS
-        ok-http:
-          read-timeout: 10s
-      client:
-        config:
-          default:
-            connectTimeout: 3000
-            readTimeout: 10000
-    nacos:
-      server-addr: 192.168.249.190:8848
-mybatis-plus:
-  type-aliases-package: com.zxyy.order.domain.entity # 别名扫描包
-  mapper-locations: classpath*:mapper/**/*.xml
-  configuration:
-    map-underscore-to-camel-case: true
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-  global-config:
-    db-config:
-      update-strategy: not_null
-      id-type: auto
-# knife4j配置
-knife4j:
-  enable: true
-# springdoc-openapi项目配置
-springdoc:
-  # 禁用扫描@ControllerAdvice的泛型响应，避免Spring Framework 6.2.x的ControllerAdviceBean构造器不兼容
-  override-with-generic-response: false
-  swagger-ui:
-    path: /swagger-ui.html
-    tags-sorter: alpha
-    operations-sorter: alpha
-  api-docs:
-    path: /v3/api-docs
-  group-configs:
-    - group: 'default'
-      paths-to-match: '/**'
-      packages-to-scan: com.zxyy.order.controller
 
 # 两个服务使用相同的内部调用令牌，不依赖浏览器或管理端登录状态。
 qchain:
