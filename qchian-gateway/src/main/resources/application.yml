@@ -1,0 +1,51 @@
+server:
+  port: 8777
+spring:
+  config:
+    import:
+      - optional:file:../config/security-local.yml
+      - optional:file:./config/security-local.yml
+  application:
+    name: qchain-gateway
+  cloud:
+    nacos:
+      server-addr: 192.168.249.190:8848
+    gateway:
+      server:
+        webflux:
+          default-filters:
+            - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+          globalcors:
+            add-to-simple-url-handler-mapping: true
+            cors-configurations:
+              '[/**]':
+                allowedOriginPatterns: '*'
+                allowedMethods: [GET, POST, PUT, DELETE, OPTIONS]
+                allowedHeaders: '*'
+                allowCredentials: true
+                maxAge: 3600
+          routes:
+            - id: user-service
+              uri: lb://user-service
+              predicates:
+                - Path=/admin/admins/**
+            - id: product-service
+              uri: lb://product-service
+              predicates:
+                - Path=/admin/category/**,/admin/product/**,/admin/virtualGoodsItem/**,/guest/category/**,/guest/product/**
+            - id: order-service
+              uri: lb://order-service
+              predicates:
+                - Path=/guest/shopOrder/**,/guest/notify,/guest/notify/
+shop:
+  jwt:
+    # 设置jwt签名加密时使用的秘钥
+    admin-secret-key: ${QCHAIN_JWT_SECRET:Wmhhb1poaVl1RGVZdW5QYW5YaWFuZ011VG9rZW4=}
+    # 设置jwt过期时间
+    admin-ttl: 7200000
+    # 设置前端传递过来的令牌名称
+    admin-token-name: authentication
+
+qchain:
+  security:
+    gateway-token: ${QCHAIN_GATEWAY_TOKEN:}

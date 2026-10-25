@@ -1,13 +1,17 @@
 server:
   port: 8060
 spring:
+  config:
+    import:
+      - optional:file:../config/security-local.yml
+      - optional:file:./config/security-local.yml
   application:
     name: product-service #微服务名称
   profiles:
     active: dev
   data:
     redis:
-      host: 192.168.249.186
+      host: 192.168.249.190
       port: 6378
       password:
   datasource:
@@ -36,7 +40,7 @@ spring:
             connectTimeout: 3000
             readTimeout: 10000
     nacos:
-      server-addr: 192.168.249.189:8848
+      server-addr: 192.168.249.190:8848
 mybatis-plus:
   type-aliases-package: com.zxyy.product.domain.entity # 别名扫描包
   mapper-locations: classpath*:mapper/**/*.xml
@@ -64,17 +68,10 @@ springdoc:
     - group: 'default'
       paths-to-match: '/**'
       packages-to-scan: com.zxyy.product.controller
-# 与用户服务保持相同的 JWT 签名配置，用于验证管理端请求。
-shop:
-  jwt:
-    # 设置jwt签名加密时使用的秘钥
-    admin-secret-key: Wmhhb1poaVl1RGVZdW5QYW5YaWFuZ011VG9rZW4=
-    # 设置jwt过期时间
-    admin-ttl: 7200000
-    # 设置前端传递过来的令牌名称
-    admin-token-name: authentication
 
 # 两个服务使用相同的内部调用令牌，不依赖浏览器或管理端登录状态。
 qchain:
+  security:
+    gateway-token: ${QCHAIN_GATEWAY_TOKEN:}
   internal:
     token: ${QCHAIN_INTERNAL_TOKEN:}

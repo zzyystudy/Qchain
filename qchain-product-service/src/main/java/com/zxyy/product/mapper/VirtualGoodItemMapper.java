@@ -24,11 +24,11 @@ public interface VirtualGoodItemMapper extends BaseMapper<VirtualGoodItem> {
             @Param("productId") Long productId,
             @Param("quantity") Integer quantity);
 
-    @Update("UPDATE virtual_goods_item SET status = 0, order_item_id = NULL " +
-            "WHERE order_item_id = #{orderItemId} AND status = 1")
-    int releaseReserved(@Param("orderItemId") Long orderItemId);
+    @Update("UPDATE virtual_goods_item SET status = 0 " +
+            "WHERE order_item_id = #{orderItemId} AND product_id = #{productId} AND status = 1")
+    int releaseReserved(@Param("orderItemId") Long orderItemId, @Param("productId") Long productId);
 
     @Update("UPDATE virtual_goods_item SET status = 2, delivered_time = NOW() " +
-            "WHERE order_item_id = #{orderItemId} AND status = 1")
-    int completeReserved(@Param("orderItemId") Long orderItemId);
+            "WHERE order_item_id = #{orderItemId} AND product_id = #{productId} AND status = 1")
+    int completeReserved(@Param("orderItemId") Long orderItemId, @Param("productId") Long productId);
 }

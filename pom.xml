@@ -21,6 +21,7 @@
         <module>qchian-api</module>
         <module>qchain-user-service</module>
         <module>qchain-order-service</module>
+        <module>qchian-gateway</module>
     </modules>
 
     <properties>

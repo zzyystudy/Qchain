@@ -168,7 +168,7 @@ public class ShopOrderService extends ServiceImpl<ShopOrderMapper, ShopOrder> {
                             RabbitMqConstant.DELAY_ORDER_ROUTING_KEY, msg,
                             new DelayMessageProcessor(msg.removeNextDelay()));
                 } catch (Exception exception) {
-                    log.error("订单延时消息发送失败，过期扫描任务将补偿处理，orderNo={}",
+                    log.error("订单延时消息发送失败，orderNo={}",
                             newShopOrder.getOrderNo(), exception);
                 }
             }

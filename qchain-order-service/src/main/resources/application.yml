@@ -1,12 +1,19 @@
 server:
   port: 8062
 spring:
+  config:
+    import:
+      - optional:file:../config/security-local.yml
+      - optional:file:./config/security-local.yml
+      # 兼容 IDEA 使用订单模块目录或 Qchain 根目录作为工作目录。
+      - optional:file:../config/order-local.yml
+      - optional:file:./config/order-local.yml
   application:
     name: order-service #微服务名称
   profiles:
     active: dev
   rabbitmq:
-    host: ${RABBITMQ_HOST:192.168.249.189}
+    host: ${RABBITMQ_HOST:192.168.249.190}
     port: ${RABBITMQ_PORT:5672}
     virtual-host: ${RABBITMQ_VHOST:/}
     username: ${RABBITMQ_USERNAME:admin}
@@ -41,7 +48,7 @@ spring:
     charset: UTF-8
   data:
     redis:
-      host: 192.168.249.186
+      host: 192.168.249.190
       port: 6378
       password:
   datasource:
@@ -70,7 +77,7 @@ spring:
             connectTimeout: 3000
             readTimeout: 10000
     nacos:
-      server-addr: 192.168.249.189:8848
+      server-addr: 192.168.249.190:8848
 mybatis-plus:
   type-aliases-package: com.zxyy.order.domain.entity # 别名扫描包
   mapper-locations: classpath*:mapper/**/*.xml
@@ -98,17 +105,10 @@ springdoc:
     - group: 'default'
       paths-to-match: '/**'
       packages-to-scan: com.zxyy.order.controller
-# JWT 签名配置，沿用 ShopStore 的密钥、有效期和请求头名称。
-shop:
-  jwt:
-    # 设置jwt签名加密时使用的秘钥
-    admin-secret-key: Wmhhb1poaVl1RGVZdW5QYW5YaWFuZ011VG9rZW4=
-    # 设置jwt过期时间
-    admin-ttl: 7200000
-    # 设置前端传递过来的令牌名称
-    admin-token-name: authentication
 
 # 两个服务使用相同的内部调用令牌，不依赖浏览器或管理端登录状态。
 qchain:
+  security:
+    gateway-token: ${QCHAIN_GATEWAY_TOKEN:}
   internal:
     token: ${QCHAIN_INTERNAL_TOKEN:}

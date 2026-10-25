@@ -4,8 +4,11 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.zxyy.product.domain.entity.Product;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Update;
+import org.apache.ibatis.annotations.Select;
 
 public interface ProductMapper extends BaseMapper<Product> {
+    @Select("SELECT * FROM product WHERE id = #{id} FOR UPDATE")
+    Product lockById(@Param("id") Long id);
 
     @Update("UPDATE product SET available_stock = available_stock - #{num} " +
             "WHERE id = #{id} AND available_stock >= #{num}")

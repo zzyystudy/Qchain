@@ -6,13 +6,12 @@ import com.zxyy.common.result.Result;
 import com.zxyy.common.context.BaseContext;
 import com.zxyy.common.constant.MessageConstant;
 import com.zxyy.user.constant.JwtClaimsConstant;
-import com.zxyy.user.constant.RedisConstant;
 import com.zxyy.user.domain.security.LoginUser;
 import com.zxyy.common.security.LoginSession;
 import com.zxyy.user.exception.PasswordError;
-import com.zxyy.user.properties.JwtProperties;
-import com.zxyy.user.util.JwtUtil;
-import com.zxyy.user.util.RedisCache;
+import com.zxyy.common.security.JwtProperties;
+import com.zxyy.common.security.JwtUtil;
+import com.zxyy.common.security.LoginSessionStore;
 import com.zxyy.api.dto.user.AdminLoginDTO;
 import com.zxyy.user.domain.entity.Admin;
 import com.zxyy.api.vo.user.AdminLoginVo;
@@ -37,7 +36,7 @@ public class AdminService extends ServiceImpl<AdminMapper, Admin> {
     @Resource
     private JwtProperties jwtProperties;
     @Autowired
-    private RedisCache redisCache;
+    private LoginSessionStore sessions;
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -74,7 +73,7 @@ public class AdminService extends ServiceImpl<AdminMapper, Admin> {
                 .build();
         LoginSession session = new LoginSession(admin.getId(), admin.getUsername(),
                 loginUser.getAuthorities().stream().map(authority -> authority.getAuthority()).toList());
-        redisCache.setCacheObject(RedisConstant.USER_LOGIN + admin.getId(), session,
+        sessions.save(session,
                 Duration.ofMillis(jwtProperties.getAdminTtl()));
         return Result.success(adminLoginVo);
     }
@@ -83,7 +82,7 @@ public class AdminService extends ServiceImpl<AdminMapper, Admin> {
         //从securityContextHolder中获取用户id
         Long id = BaseContext.getCurrentId();
         //删除redis中用户的信息
-        redisCache.deleteObject(RedisConstant.USER_LOGIN+id);
+        sessions.deleteByUserId(id);
         return Result.success("注销成功");
     }
 
