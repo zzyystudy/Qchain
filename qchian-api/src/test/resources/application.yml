@@ -1,0 +1,15 @@
+spring:
+  cloud:
+    openfeign:
+      okhttp:
+        enabled: true
+      httpclient:
+        hc5:
+          enabled: false
+        connection-timeout: 3000
+        max-connections: 50
+        max-connections-per-route: 50
+        time-to-live: 300
+        time-to-live-unit: SECONDS
+        ok-http:
+          read-timeout: 10s
