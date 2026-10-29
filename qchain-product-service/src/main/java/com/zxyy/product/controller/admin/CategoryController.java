@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -56,6 +57,10 @@ public class CategoryController {
     }
     //新增商品
     @PostMapping
+    @CacheEvict(
+            cacheNames = "qchain:cache:category:list",
+            key = "'enabled'"
+    )
     @Operation(summary = "新增分类接口")
     public Result<String> save(@RequestBody CategoryDTO CategoryDTO){
         log.info("新增商品:{}",CategoryDTO);
@@ -64,6 +69,10 @@ public class CategoryController {
     }
     //修改商品 编号 图片等等  逻辑删除！
     @PutMapping
+    @CacheEvict(
+            cacheNames = "qchain:cache:category:list",
+            key = "'enabled'"
+    )
     @Operation(summary = "修改分类接口")
     public Result<String> update(@RequestBody CategoryDTO CategoryDTO){
         log.info("修改商品:{}",CategoryDTO);
@@ -77,6 +86,10 @@ public class CategoryController {
     }
     //彻底删除接口
     @DeleteMapping
+    @CacheEvict(
+            cacheNames = "qchain:cache:category:list",
+            key = "'enabled'"
+    )
     @Operation(summary = "删除分类")
     public Result<String> delete(Long id){
         log.info("删除商品编号:{}",id);
