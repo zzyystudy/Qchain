@@ -36,6 +36,7 @@
         <ulid-creator.version>5.2.3</ulid-creator.version>
         <knife4j.version>4.5.0</knife4j.version>
         <redisson.version>3.52.0</redisson.version>
+        <commandline.version>1.5.0</commandline.version>
     </properties>
 
     <dependencyManagement>
@@ -107,6 +108,12 @@
                 <groupId>org.redisson</groupId>
                 <artifactId>redisson</artifactId>
                 <version>${redisson.version}</version>
+            </dependency>
+            <!--commandline-->
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-exec</artifactId>
+                <version>${commandline.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

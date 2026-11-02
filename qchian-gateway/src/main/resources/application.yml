@@ -32,7 +32,7 @@ spring:
             - id: product-service
               uri: lb://product-service
               predicates:
-                - Path=/admin/category/**,/admin/product/**,/admin/virtualGoodsItem/**,/guest/category/**,/guest/product/**
+                - Path=/admin/category/**,/admin/common/**,/admin/product/**,/admin/virtualGoodsItem/**,/guest/category/**,/guest/product/**
             - id: order-service
               uri: lb://order-service
               predicates:

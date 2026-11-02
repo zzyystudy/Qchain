@@ -5,6 +5,7 @@ spring:
     import:
       - optional:file:../config/security-local.yml
       - optional:file:./config/security-local.yml
+      - optional:file:./config/oss.yml
 
 # 两个服务使用相同的内部调用令牌，不依赖浏览器或管理端登录状态。
 qchain:
@@ -12,3 +13,10 @@ qchain:
     gateway-token: ${QCHAIN_GATEWAY_TOKEN:}
   internal:
     token: ${QCHAIN_INTERNAL_TOKEN:}
+
+shop:
+  alioss:
+    access-key-id: ${shop.alioss.access-key-id}
+    endpoint: ${shop.alioss.endpoint}
+    access-key-secret: ${shop.alioss.access-key-secret}
+    bucket-name: ${shop.alioss.bucket-name}
