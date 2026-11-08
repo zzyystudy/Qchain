@@ -3,6 +3,7 @@ package com.zxyy.order.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.zxyy.order.domain.entity.ShopOrder;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
 public interface ShopOrderMapper extends BaseMapper<ShopOrder> {
@@ -14,4 +15,7 @@ public interface ShopOrderMapper extends BaseMapper<ShopOrder> {
     @Update("UPDATE shop_order SET payment_status = 1, paid_time = NOW(),order_status = 20,paid_amount = #{totalAmount} " +
             "WHERE order_no = #{orderNo} AND order_status = 10 AND payment_status = 0")
     int markPaid(@Param("orderNo") String orderNo, @Param("totalAmount") String totalAmount);
+
+    @Select("select query_password_hash from shop_order where order_no = #{orderNo}")
+    String selectPasswordHashByOrderNo(String orderNo);
 }

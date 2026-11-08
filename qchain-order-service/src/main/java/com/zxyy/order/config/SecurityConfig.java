@@ -21,11 +21,25 @@ public class SecurityConfig {
     public SecurityFilterChain publicSecurityFilterChain(HttpSecurity http, UserContextFilter userContextFilter,
             AuthenticationEntryPoint entryPoint, AccessDeniedHandler deniedHandler) throws Exception {
         return defaults(http, entryPoint, deniedHandler).authorizeHttpRequests(auth -> auth
-                .requestMatchers(HttpMethod.GET, "/guest/shopOrder", "/guest/shopOrder/simple",
-                        "/doc.html", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**",
-                        "/v3/api-docs-ext/**", "/swagger-resources/**", "/webjars/**", "/favicon.ico").permitAll()
-                .requestMatchers(HttpMethod.POST, "/guest/shopOrder/submit", "/guest/shopOrder/detail",
-                        "/guest/notify", "/guest/notify/").permitAll()
+                .requestMatchers(HttpMethod.GET,"/ws/admin/chat").hasAuthority("system:admin")
+                .requestMatchers(HttpMethod.GET,
+                        "/guest/shopOrder",
+                        "/guest/shopOrder/simple",
+                        "/ws/chat/*",
+                        "/doc.html",
+                        "/swagger-ui.html",
+                        "/swagger-ui/**",
+                        "/v3/api-docs/**",
+                        "/v3/api-docs-ext/**",
+                        "/swagger-resources/**",
+                        "/webjars/**",
+                        "/favicon.ico").permitAll()
+                .requestMatchers(HttpMethod.POST,
+                        "/guest/shopOrder/submit",
+                        "/guest/shopOrder/detail",
+                        "/guest/notify",
+                        "/guest/notify/")
+                        .permitAll()
                 .anyRequest().denyAll())
                 .addFilterBefore(userContextFilter, UsernamePasswordAuthenticationFilter.class).build();
     }
@@ -34,7 +48,8 @@ public class SecurityConfig {
             AccessDeniedHandler deniedHandler) throws Exception {
         return http.cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .csrf(AbstractHttpConfigurer::disable).formLogin(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable)
+                .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .exceptionHandling(exceptions -> exceptions.authenticationEntryPoint(entryPoint)
                         .accessDeniedHandler(deniedHandler));

@@ -36,7 +36,11 @@ spring:
             - id: order-service
               uri: lb://order-service
               predicates:
-                - Path=/guest/shopOrder/**,/guest/notify,/guest/notify/
+                - Path=/guest/shopOrder/**,/guest/notify,/guest/notify/,/ws/admin/chat,/ws/chat/**
+            - id: order-service
+              uri: lb:ws://order-service
+              predicates:
+                - Path=/ws/admin/chat,/ws/chat/**
 shop:
   jwt:
     # 设置jwt签名加密时使用的秘钥

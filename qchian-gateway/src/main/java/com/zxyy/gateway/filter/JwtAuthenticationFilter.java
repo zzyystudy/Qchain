@@ -50,9 +50,17 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         var clean = exchange.mutate().request(request).build();
         String path = request.getPath().value();
         HttpMethod method = request.getMethod();
+        // 买家连接聊天：不要求管理员 token
+        // 订单密码由 BuyerChatEndpoint.onOpen 校验
+        if (HttpMethod.GET.equals(method)
+                && path.startsWith("/ws/chat/")) {
+            return chain.filter(clean);
+        }
         if (HttpMethod.OPTIONS.equals(method)
                 || HttpMethod.GET.equals(method) && PUBLIC_GET.contains(path)
-                || HttpMethod.POST.equals(method) && PUBLIC_POST.contains(path)) {
+                || HttpMethod.POST.equals(method) && PUBLIC_POST.contains(path)
+        )
+        {
             return chain.filter(clean);
         }
         if (path.equals("/internal") || path.startsWith("/internal/")) {

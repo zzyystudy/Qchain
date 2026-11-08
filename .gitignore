@@ -1,7 +1,10 @@
 #COUSTOMER
+config
 /config/
 .idea
 .mvn
+测试账号.png
+测试账号.txt
 
 target/
 !.mvn/wrapper/maven-wrapper.jar
