@@ -103,7 +103,7 @@ public class OutboxService
      * 查询并发送待发送消息。
      * 不给整个方法加数据库事务。
      */
-    @Scheduled(fixedDelay = 1000)
+    //@Scheduled(fixedDelay = 1000)
     public void sendPendingMessages() {
         List<OutboxMessage> messages = lambdaQuery()
                 .eq(OutboxMessage::getStatus, 0)

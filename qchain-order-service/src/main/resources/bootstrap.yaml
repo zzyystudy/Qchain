@@ -5,7 +5,7 @@ spring:
     active: dev
   cloud:
     nacos:
-      server-addr: 192.168.249.190:8848
+      server-addr: 192.168.249.192:8848
       config:
         namespace: 9ae22f2c-3821-422b-be21-53da39c218a2
   config:
@@ -24,4 +24,4 @@ qchain:
   knife4j:
     package-to-scan: com.zxyy.order.controller
   redis:
-    host: 192.168.249.190
+    host: 192.168.249.192

@@ -80,6 +80,33 @@ class GatewayRoutingTest {
     }
 
     @Test
+    void guestChatQueryRoutesWithoutAdminJwtAndStripsForgedIdentity() {
+        client.post().uri("/guest/chat/messages/query")
+                .header(IdentityHeaders.USER_ID, "forged")
+                .header(IdentityHeaders.GATEWAY_TOKEN, "forged")
+                .bodyValue(Map.of("orderNo", "Q1", "email", "buyer@example.com", "password", "test-password"))
+                .exchange().expectStatus().isOk()
+                .expectBody().jsonPath("$.data").isEqualTo("/guest/chat/messages/query");
+        assertThat(RECEIVED.get()).doesNotContainKeys(IdentityHeaders.USER_ID, IdentityHeaders.GATEWAY_TOKEN);
+    }
+
+    @Test
+    void bothAdminChatQueriesRouteWithVerifiedIdentity() {
+        String jwt = JwtUtil.createJWT("gateway-test-signing-secret-at-least-32-bytes", 60000, Map.of("adminId", 42L));
+        for (String path : new String[]{"/admin/chat/conversations", "/admin/chat/messages?orderNo=Q1"}) {
+            client.get().uri(path).header("authentication", jwt).exchange().expectStatus().isOk();
+            assertThat(RECEIVED.get().getFirst(IdentityHeaders.USER_ID)).isEqualTo("42");
+            assertThat(RECEIVED.get().getFirst(IdentityHeaders.GATEWAY_TOKEN)).isEqualTo("test-forwarding-credential");
+        }
+    }
+
+    @Test
+    void adminChatHistoryIsNotPublicAtGateway() {
+        client.get().uri("/admin/chat/messages?orderNo=Q1").exchange().expectStatus().isUnauthorized();
+        assertThat(RECEIVED.get()).isNull();
+    }
+
+    @Test
     void browserPreflightIsHandledWithoutTokenOrUpstream() {
         client.options().uri("/admin/product").header("Origin", "http://localhost:5173")
                 .header("Access-Control-Request-Method", "POST")

@@ -1,7 +1,9 @@
 package com.zxyy.order.ws;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zxyy.order.config.WebSocketConfig;
+import com.zxyy.order.domain.entity.ChatMessage;
 import com.zxyy.order.exception.WsException;
 import com.zxyy.order.mapper.ShopOrderMapper;
 import com.zxyy.order.util.PasswordUtil;
@@ -29,6 +31,8 @@ public class BuyerChatEndpoint {
     private ChatConnectionManager chatConnectionManager;
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private ChatService chatService;
 
     @OnOpen
     public void onOpen(Session session, @PathParam("orderNo") String orderNo) throws IOException {
@@ -52,9 +56,42 @@ public class BuyerChatEndpoint {
     }
 
     @OnMessage
-    public void onMessage(Session session,String message,@PathParam("orderNo") String orderNo){
+    public void onMessage(Session session,String wsMessage,@PathParam("orderNo") String orderNo) throws IOException {
+        //先进行消息持久化
+        //这个方法不加事务注解 事务将会失效
+        WsMessage wsMes = objectMapper.readValue(wsMessage, WsMessage.class);
+        //校验订单号
+        if(!wsMes.orderNo().equals(orderNo)){
+            throw new WsException("订单与当前连接不同");
+        }
+
+        //1.先将数据保存到数据库中 然后再说推送的事
+        //对不同类型的消息进行不同的处理 这里先处理入库和ack的返回
+        ChatMessage chatMessage = null;
+        switch(wsMes.type()){
+            case "READ" -> {
+                boolean isSuccess = chatService.readMessage(wsMes);
+                if(!isSuccess){
+                    return;
+                }
+            }
+            case "SEND_MESSAGE" -> {
+                chatMessage = chatService.saveBuyerMes(wsMes);
+                //向发送者发送 ack数据库保存成功
+                WsMessage wsMessage1 = new WsMessage("ACK",
+                        wsMes.requestId(),wsMes.orderNo(),null, chatMessage.getSeq());
+                String sendMes = objectMapper.writeValueAsString(wsMessage1);
+                session.getBasicRemote().sendText(sendMes);
+            }
+            default -> throw new WsException("不确定的消息类型");
+        }
+
         //先查一下这个订单有没有对应的管理员
         Long adminId = chatConnectionManager.selectAdminByOrderNo(orderNo);
+        //如果消息类型是read 当前没有人接待就直接返回 不需要随机找管理员推送
+        if(adminId == null && "READ".equals(wsMes.type())){
+            return;
+        }
 
         if(adminId == null){
             //说明没有绑定过管理员 绑定管理员
@@ -64,7 +101,7 @@ public class BuyerChatEndpoint {
             List<Long> list = new ArrayList<>(connectedAdminIds);
             //这里判断这个集合是不是为空 管理员都不在线
             if(list.isEmpty()){
-                throw new WsException("管理员不在线，已留言"); //TODO 将消息 保存到数据库
+                throw new WsException("管理员不在线，已留言");
             }
             adminId = list.get(ThreadLocalRandom.current().nextInt(list.size()));
         }
@@ -76,19 +113,52 @@ public class BuyerChatEndpoint {
             throw new WsException("连接管理端失败");
         }
         Set<Session> adminSessions = chatConnectionManager.getAdminSessions(adminId);
-        //将消息传递给管理端 应该是每个都要发 TODO 消息存入数据库
-        adminSessions.forEach(session1 -> {
-            try {
-                if(!session1.isOpen()){
-                    return;
-                }
-                WsMessage wsMessage = new WsMessage(orderNo, message);
-                String toMessage = objectMapper.writeValueAsString(wsMessage);
-                session1.getBasicRemote().sendText(toMessage);
-            } catch (IOException e) {
-                throw new WsException("通知管理员失败");
+        //将消息传递给管理端 应该是每个都要发
+        //2. 这里获取到在线的管理员之后应该再次switch 进行消息的转发
+        switch (wsMes.type()){
+            case "READ" -> {
+                WsMessage push = new WsMessage(
+                        "READ_RECEIPT",
+                        wsMes.requestId(),
+                        orderNo,
+                        null,
+                        Long.parseLong(wsMes.content())
+                );
+                String s = objectMapper.writeValueAsString(push);
+                adminSessions.forEach(session1 -> {
+                    try {
+                        if(!session1.isOpen()){
+                            return;
+                        }
+                        session1.getBasicRemote().sendText(s);
+                    } catch (IOException e) {
+                        throw new WsException("通知管理员失败");
+                    }
+                });
             }
-        });
+            case "SEND_MESSAGE" ->{
+                WsMessage push = new WsMessage(
+                        "MESSAGE",
+                        chatMessage.getClientMsgId(),
+                        wsMes.orderNo(),
+                        chatMessage.getContent(),
+                        chatMessage.getSeq()
+                );
+                String s = objectMapper.writeValueAsString(push);
+                adminSessions.forEach(session1 -> {
+                    try {
+                        if(!session1.isOpen()){
+                            return;
+                        }
+                        session1.getBasicRemote().sendText(s);
+                    } catch (IOException e) {
+                        throw new WsException("通知管理员失败");
+                    }
+                });
+            }
+            default -> throw new WsException("不支持的消息类型");
+        }
+
     }
 
     @OnClose

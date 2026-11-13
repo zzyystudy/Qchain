@@ -26,7 +26,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     private static final Set<String> PUBLIC_GET = Set.of("/guest/category", "/guest/product",
             "/guest/shopOrder", "/guest/shopOrder/simple");
     private static final Set<String> PUBLIC_POST = Set.of("/admin/admins/login", "/guest/shopOrder/submit",
-            "/guest/shopOrder/detail", "/guest/notify", "/guest/notify/");
+            "/guest/shopOrder/detail", "/guest/chat/messages/query", "/guest/notify", "/guest/notify/");
     private final JwtProperties jwt;
     private final GatewayIdentityProperties identity;
     private final ObjectMapper mapper;

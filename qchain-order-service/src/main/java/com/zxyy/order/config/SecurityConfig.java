@@ -21,7 +21,8 @@ public class SecurityConfig {
     public SecurityFilterChain publicSecurityFilterChain(HttpSecurity http, UserContextFilter userContextFilter,
             AuthenticationEntryPoint entryPoint, AccessDeniedHandler deniedHandler) throws Exception {
         return defaults(http, entryPoint, deniedHandler).authorizeHttpRequests(auth -> auth
-                .requestMatchers(HttpMethod.GET,"/ws/admin/chat").hasAuthority("system:admin")
+                .requestMatchers(HttpMethod.GET, "/ws/admin/chat",
+                        "/admin/chat/conversations", "/admin/chat/messages").hasAuthority("system:admin")
                 .requestMatchers(HttpMethod.GET,
                         "/guest/shopOrder",
                         "/guest/shopOrder/simple",
@@ -37,6 +38,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST,
                         "/guest/shopOrder/submit",
                         "/guest/shopOrder/detail",
+                        "/guest/chat/messages/query",
                         "/guest/notify",
                         "/guest/notify/")
                         .permitAll()
